@@ -1,0 +1,215 @@
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Rocket, ArrowRight, ArrowLeft, Zap, Clock } from "lucide-react";
+import { Strategy, Feature } from "@/pages/Index";
+import { cn } from "@/lib/utils";
+
+interface FeatureSelectionProps {
+  strategy: Strategy;
+  onStrategyUpdate: (strategy: Strategy) => void;
+  onNext: () => void;
+  onBack: () => void;
+}
+
+// Mock AI-generated features based on common OKR patterns
+const generateFeatures = (okr: string): Feature[] => {
+  const baseFeatures = [
+    {
+      id: "1",
+      title: "Advanced Analytics Dashboard",
+      description: "Real-time insights with predictive analytics to track user behavior patterns and identify growth opportunities.",
+      impact: "High" as const,
+      effort: "Medium" as const
+    },
+    {
+      id: "2", 
+      title: "Intelligent User Onboarding",
+      description: "AI-powered personalized onboarding flows that adapt based on user type and reduce time-to-value.",
+      impact: "High" as const,
+      effort: "Low" as const
+    },
+    {
+      id: "3",
+      title: "Automated Retention Engine",
+      description: "Smart notifications and engagement campaigns triggered by user behavior to prevent churn.",
+      impact: "Medium" as const,
+      effort: "High" as const
+    }
+  ];
+
+  // Customize features based on OKR content
+  if (okr.toLowerCase().includes("enterprise") || okr.toLowerCase().includes("b2b")) {
+    baseFeatures[0].title = "Enterprise Analytics Suite";
+    baseFeatures[0].description = "Comprehensive analytics with custom reporting, API access, and white-label options for enterprise clients.";
+    baseFeatures[1].title = "B2B Integration Hub";
+    baseFeatures[1].description = "Seamless integrations with popular enterprise tools and SSO capabilities.";
+  }
+
+  if (okr.toLowerCase().includes("payment") || okr.toLowerCase().includes("billing")) {
+    baseFeatures[0].title = "Smart Payment Analytics";
+    baseFeatures[1].title = "One-Click Payment Flow";
+    baseFeatures[2].title = "Fraud Detection System";
+  }
+
+  return baseFeatures;
+};
+
+const getImpactColor = (impact: string) => {
+  switch (impact) {
+    case "High": return "bg-success text-success-foreground";
+    case "Medium": return "bg-warning text-warning-foreground";
+    case "Low": return "bg-muted text-muted-foreground";
+    default: return "bg-muted text-muted-foreground";
+  }
+};
+
+const getEffortColor = (effort: string) => {
+  switch (effort) {
+    case "High": return "bg-destructive text-destructive-foreground";
+    case "Medium": return "bg-warning text-warning-foreground";
+    case "Low": return "bg-success text-success-foreground";
+    default: return "bg-muted text-muted-foreground";
+  }
+};
+
+export const FeatureSelection = ({ strategy, onStrategyUpdate, onNext, onBack }: FeatureSelectionProps) => {
+  const [features, setFeatures] = useState<Feature[]>([]);
+  const [selectedFeature, setSelectedFeature] = useState<Feature | null>(strategy.selectedFeature || null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate AI processing
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      const generatedFeatures = generateFeatures(strategy.okr);
+      setFeatures(generatedFeatures);
+      setIsLoading(false);
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [strategy.okr]);
+
+  const handleFeatureSelect = (feature: Feature) => {
+    setSelectedFeature(feature);
+    onStrategyUpdate({ ...strategy, selectedFeature: feature });
+  };
+
+  const handleNext = () => {
+    if (selectedFeature) {
+      onNext();
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-8">
+        <div className="text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-glow shadow-stellar animate-pulse">
+            <Rocket className="h-8 w-8 text-primary-foreground" />
+          </div>
+          <h2 className="text-3xl font-bold text-foreground mb-2">Analyzing Your OKR</h2>
+          <p className="text-lg text-muted-foreground">
+            Our AI is generating strategic features tailored to your objectives...
+          </p>
+        </div>
+        
+        <div className="grid md:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="border-border/50 bg-card/80 backdrop-blur-sm">
+              <CardHeader>
+                <div className="h-6 bg-muted rounded animate-pulse mb-2" />
+                <div className="h-4 bg-muted/60 rounded animate-pulse" />
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="h-4 bg-muted/40 rounded animate-pulse" />
+                  <div className="h-4 bg-muted/40 rounded animate-pulse w-4/5" />
+                  <div className="h-4 bg-muted/40 rounded animate-pulse w-3/5" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="text-center">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-glow shadow-stellar">
+          <Rocket className="h-8 w-8 text-primary-foreground" />
+        </div>
+        <h2 className="text-3xl font-bold text-foreground mb-2">Select Your Strategic Feature</h2>
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          Based on your OKR, our AI has identified these high-impact features. Select the one that best aligns with your strategic priorities.
+        </p>
+      </div>
+
+      {/* Features Grid */}
+      <div className="grid md:grid-cols-3 gap-6">
+        {features.map((feature) => (
+          <Card
+            key={feature.id}
+            className={cn(
+              "cursor-pointer transition-all duration-300 hover:shadow-lg border-border/50 bg-card/80 backdrop-blur-sm",
+              selectedFeature?.id === feature.id && "ring-2 ring-primary shadow-stellar scale-105"
+            )}
+            onClick={() => handleFeatureSelect(feature)}
+          >
+            <CardHeader>
+              <div className="flex items-start justify-between gap-2">
+                <CardTitle className="text-lg text-foreground leading-tight">
+                  {feature.title}
+                </CardTitle>
+                {selectedFeature?.id === feature.id && (
+                  <div className="p-1.5 rounded-full bg-gradient-to-br from-primary to-primary-glow">
+                    <div className="h-3 w-3 rounded-full bg-primary-foreground" />
+                  </div>
+                )}
+              </div>
+              <CardDescription className="text-sm text-muted-foreground">
+                {feature.description}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-2">
+                <Badge className={cn("text-xs", getImpactColor(feature.impact))}>
+                  <Zap className="w-3 h-3 mr-1" />
+                  {feature.impact} Impact
+                </Badge>
+                <Badge className={cn("text-xs", getEffortColor(feature.effort))}>
+                  <Clock className="w-3 h-3 mr-1" />
+                  {feature.effort} Effort
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Actions */}
+      <div className="flex justify-between pt-6">
+        <Button
+          variant="outline"
+          onClick={onBack}
+          className="border-border/50 hover:bg-secondary"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back
+        </Button>
+        <Button
+          onClick={handleNext}
+          disabled={!selectedFeature}
+          className="bg-gradient-to-r from-primary to-primary-glow hover:from-primary-accent hover:to-primary text-primary-foreground shadow-cosmic transition-all duration-200 hover:shadow-stellar"
+        >
+          Continue to KPIs
+          <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+};
