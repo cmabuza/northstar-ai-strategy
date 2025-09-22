@@ -8,6 +8,7 @@ import { ImplementationPlan } from "@/components/ImplementationPlan";
 
 export interface Strategy {
   okr: string;
+  softwareContext: string;
   selectedFeature?: Feature;
   selectedKPIs?: KPI[];
 }
@@ -29,7 +30,7 @@ export interface KPI {
 
 const Index = () => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [strategy, setStrategy] = useState<Strategy>({ okr: "" });
+  const [strategy, setStrategy] = useState<Strategy>({ okr: "", softwareContext: "" });
 
   const steps = [
     { number: 1, title: "Define OKR", icon: Target },

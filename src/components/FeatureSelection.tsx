@@ -2,7 +2,9 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Rocket, ArrowRight, ArrowLeft, Zap, Clock } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Rocket, ArrowRight, ArrowLeft, Zap, Clock, RefreshCw, Edit3 } from "lucide-react";
 import { Strategy, Feature } from "@/pages/Index";
 import { cn } from "@/lib/utils";
 
@@ -14,7 +16,7 @@ interface FeatureSelectionProps {
 }
 
 // Mock AI-generated features based on common OKR patterns
-const generateFeatures = (okr: string): Feature[] => {
+const generateFeatures = (okr: string, softwareContext?: string): Feature[] => {
   const baseFeatures = [
     {
       id: "1",
@@ -78,18 +80,21 @@ export const FeatureSelection = ({ strategy, onStrategyUpdate, onNext, onBack }:
   const [features, setFeatures] = useState<Feature[]>([]);
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(strategy.selectedFeature || null);
   const [isLoading, setIsLoading] = useState(true);
+  const [editingFeature, setEditingFeature] = useState<Feature | null>(null);
+  const [editedTitle, setEditedTitle] = useState("");
+  const [editedDescription, setEditedDescription] = useState("");
 
   useEffect(() => {
     // Simulate AI processing
     setIsLoading(true);
     const timer = setTimeout(() => {
-      const generatedFeatures = generateFeatures(strategy.okr);
+      const generatedFeatures = generateFeatures(strategy.okr, strategy.softwareContext);
       setFeatures(generatedFeatures);
       setIsLoading(false);
     }, 1500);
 
     return () => clearTimeout(timer);
-  }, [strategy.okr]);
+  }, [strategy.okr, strategy.softwareContext]);
 
   const handleFeatureSelect = (feature: Feature) => {
     setSelectedFeature(feature);
@@ -99,6 +104,44 @@ export const FeatureSelection = ({ strategy, onStrategyUpdate, onNext, onBack }:
   const handleNext = () => {
     if (selectedFeature) {
       onNext();
+    }
+  };
+
+  const handleRegenerate = () => {
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      const generatedFeatures = generateFeatures(strategy.okr, strategy.softwareContext);
+      setFeatures(generatedFeatures);
+      setSelectedFeature(null);
+      setIsLoading(false);
+    }, 1500);
+  };
+
+  const handleEditFeature = (feature: Feature) => {
+    setEditingFeature(feature);
+    setEditedTitle(feature.title);
+    setEditedDescription(feature.description);
+  };
+
+  const handleSaveEdit = () => {
+    if (editingFeature && editedTitle.trim() && editedDescription.trim()) {
+      const updatedFeature = {
+        ...editingFeature,
+        title: editedTitle,
+        description: editedDescription
+      };
+      
+      const updatedFeatures = features.map(f => 
+        f.id === editingFeature.id ? updatedFeature : f
+      );
+      setFeatures(updatedFeatures);
+      
+      if (selectedFeature?.id === editingFeature.id) {
+        setSelectedFeature(updatedFeature);
+        onStrategyUpdate({ ...strategy, selectedFeature: updatedFeature });
+      }
+      
+      setEditingFeature(null);
     }
   };
 
@@ -147,6 +190,16 @@ export const FeatureSelection = ({ strategy, onStrategyUpdate, onNext, onBack }:
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
           Based on your OKR, our AI has identified these high-impact features. Select the one that best aligns with your strategic priorities.
         </p>
+        <div className="flex justify-center mt-4">
+          <Button
+            onClick={handleRegenerate}
+            variant="outline"
+            className="border-border/50 hover:bg-secondary"
+          >
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Regenerate Options
+          </Button>
+        </div>
       </div>
 
       {/* Features Grid */}
@@ -165,11 +218,24 @@ export const FeatureSelection = ({ strategy, onStrategyUpdate, onNext, onBack }:
                 <CardTitle className="text-lg text-foreground leading-tight">
                   {feature.title}
                 </CardTitle>
-                {selectedFeature?.id === feature.id && (
-                  <div className="p-1.5 rounded-full bg-gradient-to-br from-primary to-primary-glow">
-                    <div className="h-3 w-3 rounded-full bg-primary-foreground" />
-                  </div>
-                )}
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEditFeature(feature);
+                    }}
+                    className="h-6 w-6 p-0 hover:bg-secondary"
+                  >
+                    <Edit3 className="h-3 w-3" />
+                  </Button>
+                  {selectedFeature?.id === feature.id && (
+                    <div className="p-1.5 rounded-full bg-gradient-to-br from-primary to-primary-glow">
+                      <div className="h-3 w-3 rounded-full bg-primary-foreground" />
+                    </div>
+                  )}
+                </div>
               </div>
               <CardDescription className="text-sm text-muted-foreground">
                 {feature.description}
@@ -190,6 +256,58 @@ export const FeatureSelection = ({ strategy, onStrategyUpdate, onNext, onBack }:
           </Card>
         ))}
       </div>
+
+      {/* Edit Feature Dialog */}
+      <Dialog open={!!editingFeature} onOpenChange={() => setEditingFeature(null)}>
+        <DialogContent className="sm:max-w-[525px]">
+          <DialogHeader>
+            <DialogTitle>Edit Feature</DialogTitle>
+            <DialogDescription>
+              Customize the feature title and description to better match your needs.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-foreground mb-2 block">
+                Feature Title
+              </label>
+              <input
+                type="text"
+                value={editedTitle}
+                onChange={(e) => setEditedTitle(e.target.value)}
+                className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:border-primary focus:outline-none"
+                placeholder="Enter feature title..."
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-foreground mb-2 block">
+                Feature Description
+              </label>
+              <Textarea
+                value={editedDescription}
+                onChange={(e) => setEditedDescription(e.target.value)}
+                className="min-h-24 bg-background border-border focus:border-primary"
+                placeholder="Enter feature description..."
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setEditingFeature(null)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSaveEdit}
+                disabled={!editedTitle.trim() || !editedDescription.trim()}
+                className="bg-gradient-to-r from-primary to-primary-glow hover:from-primary-accent hover:to-primary text-primary-foreground"
+              >
+                Save Changes
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Actions */}
       <div className="flex justify-between pt-6">

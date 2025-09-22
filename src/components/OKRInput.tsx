@@ -31,6 +31,7 @@ const sampleOKRs = [
 
 export const OKRInput = ({ strategy, onStrategyUpdate, onNext }: OKRInputProps) => {
   const [okrText, setOkrText] = useState(strategy.okr);
+  const [softwareContext, setSoftwareContext] = useState(strategy.softwareContext);
 
   const handleSampleSelect = (sampleOKR: string) => {
     setOkrText(sampleOKR);
@@ -39,7 +40,7 @@ export const OKRInput = ({ strategy, onStrategyUpdate, onNext }: OKRInputProps) 
 
   const handleSubmit = () => {
     if (okrText.trim()) {
-      onStrategyUpdate({ ...strategy, okr: okrText });
+      onStrategyUpdate({ ...strategy, okr: okrText, softwareContext });
       onNext();
     }
   };
@@ -85,6 +86,24 @@ export const OKRInput = ({ strategy, onStrategyUpdate, onNext }: OKRInputProps) 
           ))}
         </div>
       </div>
+
+      {/* Software Context */}
+      <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle className="text-foreground">Software Context</CardTitle>
+          <CardDescription>
+            Describe your software/product to help generate more tailored feature suggestions.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Textarea
+            placeholder="Example: A SaaS billing platform for B2B companies, or a mobile app for food delivery..."
+            value={softwareContext}
+            onChange={(e) => setSoftwareContext(e.target.value)}
+            className="min-h-24 bg-background/50 border-border/50 focus:border-primary resize-none"
+          />
+        </CardContent>
+      </Card>
 
       {/* OKR Input */}
       <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
