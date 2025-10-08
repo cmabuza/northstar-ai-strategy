@@ -56,6 +56,24 @@ const Index = () => {
     }
   }, [user, authLoading, navigate]);
 
+  // Load previous strategies when user is authenticated
+  useEffect(() => {
+    if (user) {
+      loadPreviousStrategies();
+    }
+  }, [user]);
+
+  const loadPreviousStrategies = async () => {
+    if (!user) return;
+    
+    try {
+      const data = await databaseService.fetchStrategies(user.id);
+      setPreviousStrategies(data || []);
+    } catch (error) {
+      console.error('Error loading strategies:', error);
+    }
+  };
+
   // Show loading state while checking auth
   if (authLoading) {
     return (
@@ -73,22 +91,6 @@ const Index = () => {
     return null;
   }
 
-  useEffect(() => {
-    if (user) {
-      loadPreviousStrategies();
-    }
-  }, [user]);
-
-  const loadPreviousStrategies = async () => {
-    if (!user) return;
-    
-    try {
-      const data = await databaseService.fetchStrategies(user.id);
-      setPreviousStrategies(data || []);
-    } catch (error) {
-      console.error('Error loading strategies:', error);
-    }
-  };
 
   const steps = [
     { number: 1, title: "Define OKR", icon: Target },
