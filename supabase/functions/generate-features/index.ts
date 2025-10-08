@@ -1,7 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-// Version 2.0 - Fixed implementation type handling
+// Version 3.0 - Strengthened tool choice enforcement
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -92,12 +92,28 @@ serve(async (req) => {
       };
     } else if (type === 'implementation') {
       console.log('🚀 IMPLEMENTATION TYPE DETECTED - Will use generate_implementation tool');
-      systemPrompt = 'You are a product implementation expert. Create EXACTLY 4 implementation phases with specific tasks and deliverables, plus tracking events for analytics. You must return steps and trackingEvents arrays. Do not return KPIs.';
+      systemPrompt = `CRITICAL: You are generating an IMPLEMENTATION PLAN, NOT KPIs or features.
+You must create EXACTLY 4 implementation phases with tasks and deliverables.
+You must also create tracking events for analytics.
+
+REQUIRED OUTPUT STRUCTURE:
+{
+  "steps": [
+    { "phase": "Phase 1: Foundation", "duration": "Week 1-2", "tasks": ["task1", "task2", "task3"], "deliverables": ["deliverable1", "deliverable2"] }
+  ],
+  "trackingEvents": [
+    { "event": "event_name", "description": "what it tracks", "parameters": ["param1", "param2"] }
+  ]
+}
+
+FORBIDDEN: Do NOT return kpis, features, or any other structure.
+This is about HOW to implement the feature step-by-step, NOT what to measure.`;
+      
       toolDefinition = {
         type: 'function',
         function: {
           name: 'generate_implementation',
-          description: 'Generate a 4-phase implementation plan with tracking events. Must include steps array and trackingEvents array.',
+          description: 'Generate a detailed 4-phase implementation plan showing HOW to build the feature. This is NOT for generating KPIs or features. Must return a steps array (4 phases with tasks/deliverables) and a trackingEvents array (analytics events). DO NOT use this for KPI generation.',
           parameters: {
             type: 'object',
             properties: {
@@ -159,11 +175,29 @@ serve(async (req) => {
     console.log('Tool definition name:', toolDefinition.function.name);
     console.log('System prompt:', systemPrompt);
 
+    // Pre-flight validation
+    if (type === 'implementation' && toolDefinition.function.name !== 'generate_implementation') {
+      throw new Error('Configuration error: Wrong tool definition for implementation type');
+    }
+    if (type === 'kpis' && toolDefinition.function.name !== 'generate_kpis') {
+      throw new Error('Configuration error: Wrong tool definition for kpis type');
+    }
+    if (type === 'features' && toolDefinition.function.name !== 'generate_features') {
+      throw new Error('Configuration error: Wrong tool definition for features type');
+    }
+    console.log('✅ Pre-flight check passed:', toolDefinition.function.name);
+
+    // Add example structure for implementation requests
+    let userMessage = prompt;
+    if (type === 'implementation') {
+      userMessage += `\n\nREMINDER: Return ONLY the implementation plan structure with steps and trackingEvents. Do NOT return KPIs.`;
+    }
+
     const requestBody = {
       model: 'google/gemini-2.5-flash',
       messages: [
         { role: 'system', content: systemPrompt },
-        { role: 'user', content: prompt }
+        { role: 'user', content: userMessage }
       ],
       tools: [toolDefinition],
       tool_choice: { type: 'function', function: { name: toolDefinition.function.name } }
