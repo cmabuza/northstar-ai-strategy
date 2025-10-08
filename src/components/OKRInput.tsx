@@ -18,17 +18,20 @@ const sampleOKRs = [
   {
     company: "BillEaze",
     okr: "Increase enterprise client adoption by 50% this quarter",
-    description: "Focus on B2B growth and enterprise features"
+    description: "Focus on B2B growth and enterprise features",
+    context: "A white-labled SAAS for bill presentment and payment"
   },
   {
     company: "e-Tswane",
     okr: "Reduce monthly churn by 35% and increase MAU by 40%",
-    description: "Improve retention and user engagement"
+    description: "Improve retention and user engagement",
+    context: "A online citizen service portal for the City of Tswane, an official e-government platform. The platform provides residents, property owners, businesses and visitors with digital access to municipal services. These services include: Applications, management and payment for water, electricity, service requests and account queries. Account management, registration, statement viewing, payment and the ability to update personal information is also available. This is a self-service digital alternative."
   },
   {
     company: "e-Joburg",
     okr: "Increase online payment volume by 60% while reducing costs by 20%",
-    description: "Optimize payment processing efficiency"
+    description: "Optimize payment processing efficiency",
+    context: "A online citizen service portal for the City of Johannesburg, an official e-government platform. The platform provides residents, property owners, businesses and visitors with digital access to municipal services. These services include: Applications, management and payment for water, electricity, service requests and account queries. Account management, registration, statement viewing, payment and the ability to update personal information is also available. This is a self-service digital alternative."
   }
 ];
 
@@ -59,9 +62,8 @@ export const OKRInput = ({ strategy, onStrategyUpdate, onNext, loading }: OKRInp
 
   const handleSampleSelect = (sample: typeof sampleOKRs[0]) => {
     setOkrText(sample.okr);
-    const context = `A ${sample.company} platform`;
-    setSoftwareContext(context);
-    onStrategyUpdate({ ...strategy, okr: sample.okr, softwareContext: context });
+    setSoftwareContext(sample.context);
+    onStrategyUpdate({ ...strategy, okr: sample.okr, softwareContext: sample.context });
   };
 
   const handleSubmit = () => {
