@@ -89,6 +89,7 @@ serve(async (req) => {
         }
       };
     } else if (type === 'implementation') {
+      console.log('🚀 IMPLEMENTATION TYPE DETECTED - Will use generate_implementation tool');
       systemPrompt = 'You are a product implementation expert. Create EXACTLY 4 implementation phases with specific tasks and deliverables, plus tracking events for analytics. You must return steps and trackingEvents arrays. Do not return KPIs.';
       toolDefinition = {
         type: 'function',
