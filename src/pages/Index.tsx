@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Rocket, Target, BarChart3, Download, History, X, FileJson, FileSpreadsheet, FileText, RotateCcw } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Rocket, Target, BarChart3, Download, History, X, FileJson, FileSpreadsheet, FileText, RotateCcw, LogOut } from "lucide-react";
 import { StepIndicator } from "@/components/StepIndicator";
 import { OKRInput } from "@/components/OKRInput";
 import { FeatureSelection } from "@/components/FeatureSelection";
@@ -12,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { databaseService } from "@/services/database";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { exportToJSON, exportToCSV, exportToPDF } from "@/lib/exportUtils";
 
 export interface Strategy {
@@ -37,6 +39,8 @@ export interface KPI {
 }
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { user, loading: authLoading, signOut } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [strategy, setStrategy] = useState<Strategy>({ okr: "", softwareContext: "" });
   const [strategyId, setStrategyId] = useState<string | null>(null);
@@ -45,13 +49,41 @@ const Index = () => {
   const [previousStrategies, setPreviousStrategies] = useState<any[]>([]);
   const { toast } = useToast();
 
+  // Redirect to auth if not logged in
   useEffect(() => {
-    loadPreviousStrategies();
-  }, []);
+    if (!authLoading && !user) {
+      navigate("/auth");
+    }
+  }, [user, authLoading, navigate]);
+
+  // Show loading state while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-accent/30 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render if not authenticated
+  if (!user) {
+    return null;
+  }
+
+  useEffect(() => {
+    if (user) {
+      loadPreviousStrategies();
+    }
+  }, [user]);
 
   const loadPreviousStrategies = async () => {
+    if (!user) return;
+    
     try {
-      const data = await databaseService.fetchStrategies();
+      const data = await databaseService.fetchStrategies(user.id);
       setPreviousStrategies(data || []);
     } catch (error) {
       console.error('Error loading strategies:', error);
@@ -66,13 +98,14 @@ const Index = () => {
   ];
 
   const saveStrategyToDb = async () => {
-    if (!strategy.okr || !strategy.softwareContext) return;
+    if (!strategy.okr || !strategy.softwareContext || !user) return;
 
     try {
       setLoading(true);
       const savedStrategy = await databaseService.saveStrategy(
         strategy.okr,
-        strategy.softwareContext
+        strategy.softwareContext,
+        user.id
       );
       setStrategyId(savedStrategy.id);
       await loadPreviousStrategies();
@@ -266,6 +299,18 @@ const Index = () => {
             </div>
             <div className="flex gap-2">
               <ThemeToggle />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  await signOut();
+                  navigate("/auth");
+                }}
+                className="border-border/50 hover:bg-destructive/10 text-destructive"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Logout</span>
+              </Button>
               {currentStep > 1 && (
                 <Button
                   variant="outline"

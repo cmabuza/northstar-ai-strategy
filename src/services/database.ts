@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
+import { validateStrategy, validateFeature, validateKPI } from '@/lib/validation';
 
 type Strategy = Database['public']['Tables']['strategies']['Insert'];
 type Feature = Database['public']['Tables']['features']['Insert'];
@@ -10,7 +11,14 @@ export const databaseService = {
   /**
    * Save a new strategy to the database
    */
-  async saveStrategy(okrText: string, productType: string, userId?: string) {
+  async saveStrategy(okrText: string, productType: string, userId: string) {
+    // Validate input
+    validateStrategy({ okr: okrText, softwareContext: productType });
+    
+    if (!userId) {
+      throw new Error('User must be authenticated to save strategies');
+    }
+
     const { data, error } = await supabase
       .from('strategies')
       .insert({
@@ -29,6 +37,11 @@ export const databaseService = {
    * Save multiple features linked to a strategy
    */
   async saveFeatures(strategyId: string, features: Omit<Feature, 'strategy_id'>[]) {
+    // Validate each feature
+    features.forEach(feature => {
+      validateFeature(feature);
+    });
+
     const featuresWithStrategy = features.map(feature => ({
       ...feature,
       strategy_id: strategyId,
@@ -47,6 +60,11 @@ export const databaseService = {
    * Save multiple KPIs linked to a feature
    */
   async saveKPIs(featureId: string, kpis: Omit<KPI, 'feature_id'>[]) {
+    // Validate each KPI
+    kpis.forEach(kpi => {
+      validateKPI(kpi);
+    });
+
     const kpisWithFeature = kpis.map(kpi => ({
       ...kpi,
       feature_id: featureId,
@@ -78,8 +96,12 @@ export const databaseService = {
   /**
    * Fetch previous strategies with their related data
    */
-  async fetchStrategies(userId?: string) {
-    let query = supabase
+  async fetchStrategies(userId: string) {
+    if (!userId) {
+      throw new Error('User must be authenticated to fetch strategies');
+    }
+
+    const { data, error } = await supabase
       .from('strategies')
       .select(`
         *,
@@ -89,13 +111,8 @@ export const databaseService = {
         ),
         implementations (*)
       `)
+      .eq('user_id', userId)
       .order('created_at', { ascending: false });
-
-    if (userId) {
-      query = query.eq('user_id', userId);
-    }
-
-    const { data, error } = await query;
 
     if (error) throw error;
     return data;
