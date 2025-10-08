@@ -86,53 +86,61 @@ serve(async (req) => {
         }
       };
     } else if (type === 'implementation') {
-      systemPrompt = 'You are a product implementation expert. Create a detailed 4-phase implementation plan with specific tasks, deliverables, and tracking events for Power BI integration.';
+      systemPrompt = 'You are a product implementation expert. Create EXACTLY 4 implementation phases with specific tasks and deliverables, plus tracking events for analytics. You must return steps and trackingEvents arrays. Do not return KPIs.';
       toolDefinition = {
         type: 'function',
         function: {
           name: 'generate_implementation',
-          description: 'Generate implementation plan with phases and tracking events',
+          description: 'Generate a 4-phase implementation plan with tracking events. Must include steps array and trackingEvents array.',
           parameters: {
             type: 'object',
             properties: {
               steps: {
                 type: 'array',
+                description: 'Array of 4 implementation phases',
                 items: {
                   type: 'object',
                   properties: {
-                    phase: { type: 'string', description: 'Phase name' },
-                    duration: { type: 'string', description: 'Time duration (e.g., Week 1-2)' },
+                    phase: { type: 'string', description: 'Phase name (e.g., "Phase 1: Foundation")' },
+                    duration: { type: 'string', description: 'Time duration (e.g., "Week 1-2")' },
                     tasks: { 
                       type: 'array', 
                       items: { type: 'string' },
-                      description: 'List of specific tasks'
+                      description: 'List of specific tasks to complete',
+                      minItems: 3
                     },
                     deliverables: { 
                       type: 'array', 
                       items: { type: 'string' },
-                      description: 'Key deliverables for this phase'
+                      description: 'Key deliverables for this phase',
+                      minItems: 2
                     }
                   },
-                  required: ['phase', 'duration', 'tasks', 'deliverables']
+                  required: ['phase', 'duration', 'tasks', 'deliverables'],
+                  additionalProperties: false
                 },
                 minItems: 4,
                 maxItems: 4
               },
               trackingEvents: {
                 type: 'array',
+                description: 'Analytics events for Power BI tracking',
                 items: {
                   type: 'object',
                   properties: {
-                    event: { type: 'string', description: 'Event name in snake_case' },
-                    description: { type: 'string' },
+                    event: { type: 'string', description: 'Event name in snake_case (e.g., "challenge_submitted")' },
+                    description: { type: 'string', description: 'What this event tracks' },
                     parameters: { 
                       type: 'array', 
                       items: { type: 'string' },
-                      description: 'Tracking parameters'
+                      description: 'Parameters to capture (e.g., "user_id", "challenge_id")',
+                      minItems: 2
                     }
                   },
-                  required: ['event', 'description', 'parameters']
-                }
+                  required: ['event', 'description', 'parameters'],
+                  additionalProperties: false
+                },
+                minItems: 4
               }
             },
             required: ['steps', 'trackingEvents'],
