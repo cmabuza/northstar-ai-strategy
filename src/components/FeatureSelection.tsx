@@ -7,6 +7,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Rocket, ArrowRight, ArrowLeft, Zap, Clock, RefreshCw, Edit3 } from "lucide-react";
 import { Strategy, Feature } from "@/pages/Index";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface FeatureSelectionProps {
   strategy: Strategy;
@@ -16,47 +18,23 @@ interface FeatureSelectionProps {
   loading?: boolean;
 }
 
-// Mock AI-generated features based on common OKR patterns
-const generateFeatures = (okr: string, softwareContext?: string): Feature[] => {
-  const baseFeatures = [
-    {
-      id: "1",
-      title: "Advanced Analytics Dashboard",
-      description: "Real-time insights with predictive analytics to track user behavior patterns and identify growth opportunities.",
-      impact: "High" as const,
-      effort: "Medium" as const
-    },
-    {
-      id: "2", 
-      title: "Intelligent User Onboarding",
-      description: "AI-powered personalized onboarding flows that adapt based on user type and reduce time-to-value.",
-      impact: "High" as const,
-      effort: "Low" as const
-    },
-    {
-      id: "3",
-      title: "Automated Retention Engine",
-      description: "Smart notifications and engagement campaigns triggered by user behavior to prevent churn.",
-      impact: "Medium" as const,
-      effort: "High" as const
-    }
-  ];
+const generateFeatures = async (okr: string, softwareContext?: string): Promise<Feature[]> => {
+  const prompt = `OKR: ${okr}\n\nSoftware Context: ${softwareContext || 'Not specified'}\n\nGenerate 3 strategic features that would help achieve this OKR. Each feature should be practical and tailored to the context.`;
+  
+  const { data, error } = await supabase.functions.invoke('generate-features', {
+    body: { prompt, type: 'features' }
+  });
 
-  // Customize features based on OKR content
-  if (okr.toLowerCase().includes("enterprise") || okr.toLowerCase().includes("b2b")) {
-    baseFeatures[0].title = "Enterprise Analytics Suite";
-    baseFeatures[0].description = "Comprehensive analytics with custom reporting, API access, and white-label options for enterprise clients.";
-    baseFeatures[1].title = "B2B Integration Hub";
-    baseFeatures[1].description = "Seamless integrations with popular enterprise tools and SSO capabilities.";
-  }
+  if (error) throw error;
+  if (!data?.features) throw new Error('No features returned from AI');
 
-  if (okr.toLowerCase().includes("payment") || okr.toLowerCase().includes("billing")) {
-    baseFeatures[0].title = "Smart Payment Analytics";
-    baseFeatures[1].title = "One-Click Payment Flow";
-    baseFeatures[2].title = "Fraud Detection System";
-  }
-
-  return baseFeatures;
+  return data.features.map((f: any, idx: number) => ({
+    id: String(idx + 1),
+    title: f.title,
+    description: f.description,
+    impact: f.impact,
+    effort: f.effort
+  }));
 };
 
 const getImpactColor = (impact: string) => {
@@ -84,17 +62,27 @@ export const FeatureSelection = ({ strategy, onStrategyUpdate, onNext, onBack, l
   const [editingFeature, setEditingFeature] = useState<Feature | null>(null);
   const [editedTitle, setEditedTitle] = useState("");
   const [editedDescription, setEditedDescription] = useState("");
+  const { toast } = useToast();
 
   useEffect(() => {
-    // Simulate AI processing
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      const generatedFeatures = generateFeatures(strategy.okr, strategy.softwareContext);
-      setFeatures(generatedFeatures);
-      setIsLoading(false);
-    }, 1500);
+    const loadFeatures = async () => {
+      setIsLoading(true);
+      try {
+        const generatedFeatures = await generateFeatures(strategy.okr, strategy.softwareContext);
+        setFeatures(generatedFeatures);
+      } catch (error) {
+        console.error('Error generating features:', error);
+        toast({
+          title: "Error",
+          description: error instanceof Error ? error.message : "Failed to generate features. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    return () => clearTimeout(timer);
+    loadFeatures();
   }, [strategy.okr, strategy.softwareContext]);
 
   const handleFeatureSelect = (feature: Feature) => {
@@ -108,14 +96,25 @@ export const FeatureSelection = ({ strategy, onStrategyUpdate, onNext, onBack, l
     }
   };
 
-  const handleRegenerate = () => {
+  const handleRegenerate = async () => {
     setIsLoading(true);
-    const timer = setTimeout(() => {
-      const generatedFeatures = generateFeatures(strategy.okr, strategy.softwareContext);
+    setSelectedFeature(null);
+    try {
+      const generatedFeatures = await generateFeatures(strategy.okr, strategy.softwareContext);
       setFeatures(generatedFeatures);
-      setSelectedFeature(null);
+      toast({
+        title: "Success",
+        description: "New features generated successfully!",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to regenerate features. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const handleEditFeature = (feature: Feature) => {

@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Download, ArrowLeft, Calendar, Code, BarChart3, Database, CheckCircle2 } from "lucide-react";
 import { Strategy } from "@/pages/Index";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface ImplementationPlanProps {
   strategy: Strategy;
@@ -24,98 +26,48 @@ interface TrackingEvent {
   parameters: string[];
 }
 
-const generateImplementationPlan = (strategy: Strategy) => {
-  const steps: ImplementationStep[] = [
-    {
-      phase: "Planning & Design",
-      duration: "Week 1-2",
-      tasks: [
-        "Define technical requirements and architecture",
-        "Create user experience mockups and wireframes",
-        "Set up tracking infrastructure and analytics",
-        "Plan integration points with existing systems"
-      ],
-      deliverables: [
-        "Technical specification document",
-        "UI/UX design system",
-        "Analytics implementation plan"
-      ]
-    },
-    {
-      phase: "Development",
-      duration: "Week 3-6",
-      tasks: [
-        "Implement core feature functionality",
-        "Build analytics tracking events",
-        "Create Power BI dashboard templates",
-        "Develop API endpoints for data collection"
-      ],
-      deliverables: [
-        "Feature implementation",
-        "Tracking event library",
-        "Dashboard templates"
-      ]
-    },
-    {
-      phase: "Testing & Integration",
-      duration: "Week 7-8",
-      tasks: [
-        "Conduct user acceptance testing",
-        "Validate analytics data accuracy",
-        "Test Power BI dashboard connectivity",
-        "Performance optimization and security review"
-      ],
-      deliverables: [
-        "Test results and bug fixes",
-        "Validated analytics pipeline",
-        "Performance benchmarks"
-      ]
-    },
-    {
-      phase: "Launch & Monitoring",
-      duration: "Week 9-10",
-      tasks: [
-        "Deploy feature to production",
-        "Monitor initial user adoption",
-        "Validate KPI tracking accuracy",
-        "Iterate based on early feedback"
-      ],
-      deliverables: [
-        "Production deployment",
-        "Real-time monitoring dashboard",
-        "Initial performance report"
-      ]
-    }
-  ];
+const generateImplementationPlan = async (strategy: Strategy) => {
+  const kpiNames = strategy.selectedKPIs?.map(kpi => kpi.name).join(', ') || '';
+  
+  const prompt = `Feature: ${strategy.selectedFeature?.title}\n\nDescription: ${strategy.selectedFeature?.description}\n\nSelected KPIs: ${kpiNames}\n\nCreate a detailed 4-phase implementation plan with specific tasks, deliverables, and tracking events for Power BI integration.`;
+  
+  const { data, error } = await supabase.functions.invoke('generate-features', {
+    body: { prompt, type: 'implementation' }
+  });
 
-  const trackingEvents: TrackingEvent[] = strategy.selectedKPIs?.map((kpi, index) => ({
-    event: `track_${kpi.name.toLowerCase().replace(/\s+/g, '_')}`,
-    description: `Track ${kpi.name} metric`,
-    parameters: [
-      "user_id",
-      "feature_id", 
-      "timestamp",
-      "value",
-      ...(index % 2 === 0 ? ["session_id"] : ["page_url"])
-    ]
-  })) || [];
+  if (error) throw error;
+  if (!data?.steps || !data?.trackingEvents) throw new Error('Invalid implementation plan from AI');
 
-  return { steps, trackingEvents };
+  return {
+    steps: data.steps,
+    trackingEvents: data.trackingEvents
+  };
 };
 
 export const ImplementationPlan = ({ strategy, onBack, loading }: ImplementationPlanProps) => {
   const [plan, setPlan] = useState<{ steps: ImplementationStep[], trackingEvents: TrackingEvent[] }>({ steps: [], trackingEvents: [] });
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      const generatedPlan = generateImplementationPlan(strategy);
-      setPlan(generatedPlan);
-      setIsLoading(false);
-    }, 2000);
+    const loadPlan = async () => {
+      setIsLoading(true);
+      try {
+        const generatedPlan = await generateImplementationPlan(strategy);
+        setPlan(generatedPlan);
+      } catch (error) {
+        console.error('Error generating implementation plan:', error);
+        toast({
+          title: "Error",
+          description: "Failed to generate implementation plan. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    return () => clearTimeout(timer);
+    loadPlan();
   }, [strategy]);
 
   const handleExport = () => {

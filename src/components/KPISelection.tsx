@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Checkbox } from "@/components/ui/checkbox";
 import { BarChart3, ArrowRight, ArrowLeft, TrendingUp } from "lucide-react";
 import { Strategy, KPI } from "@/pages/Index";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface KPISelectionProps {
   strategy: Strategy;
@@ -13,85 +15,51 @@ interface KPISelectionProps {
   loading?: boolean;
 }
 
-// Generate KPIs based on selected feature
-const generateKPIs = (featureTitle: string): KPI[] => {
-  const baseKPIs = [
-    {
-      id: "1",
-      name: "User Adoption Rate",
-      description: "Percentage of active users engaging with the new feature within 30 days",
-      selected: false
-    },
-    {
-      id: "2",
-      name: "Feature Engagement Score",
-      description: "Average daily interactions per user with the feature",
-      selected: false
-    },
-    {
-      id: "3",
-      name: "Time to Value",
-      description: "Average time for users to achieve their first meaningful outcome",
-      selected: false
-    },
-    {
-      id: "4",
-      name: "User Satisfaction (NPS)",
-      description: "Net Promoter Score specifically related to the feature experience",
-      selected: false
-    },
-    {
-      id: "5",
-      name: "Conversion Rate Impact",
-      description: "Lift in conversion rate attributed to the feature implementation",
-      selected: false
-    },
-    {
-      id: "6",
-      name: "Support Ticket Reduction",
-      description: "Decrease in related support requests after feature deployment",
-      selected: false
-    }
-  ];
+const generateKPIs = async (featureTitle: string, featureDescription: string): Promise<KPI[]> => {
+  const prompt = `Feature: ${featureTitle}\n\nDescription: ${featureDescription}\n\nGenerate 6 specific, measurable KPIs to track the success of this feature.`;
+  
+  const { data, error } = await supabase.functions.invoke('generate-features', {
+    body: { prompt, type: 'kpis' }
+  });
 
-  // Customize KPIs based on feature type
-  if (featureTitle.toLowerCase().includes("analytics") || featureTitle.toLowerCase().includes("dashboard")) {
-    baseKPIs[1].name = "Dashboard Usage Frequency";
-    baseKPIs[1].description = "Number of times users access and interact with analytics dashboards";
-    baseKPIs[4].name = "Data-Driven Decisions";
-    baseKPIs[4].description = "Percentage of business decisions made using dashboard insights";
-  }
+  if (error) throw error;
+  if (!data?.kpis) throw new Error('No KPIs returned from AI');
 
-  if (featureTitle.toLowerCase().includes("onboarding")) {
-    baseKPIs[2].name = "Onboarding Completion Rate";
-    baseKPIs[2].description = "Percentage of users who complete the full onboarding flow";
-    baseKPIs[5].name = "Early Engagement Rate";
-    baseKPIs[5].description = "Percentage of users active within first 7 days";
-  }
-
-  if (featureTitle.toLowerCase().includes("payment")) {
-    baseKPIs[0].name = "Payment Success Rate";
-    baseKPIs[4].name = "Transaction Volume";
-    baseKPIs[5].name = "Payment Method Adoption";
-  }
-
-  return baseKPIs;
+  return data.kpis.map((k: any, idx: number) => ({
+    id: String(idx + 1),
+    name: k.name,
+    description: k.description,
+    selected: false
+  }));
 };
 
 export const KPISelection = ({ strategy, onStrategyUpdate, onNext, onBack, loading }: KPISelectionProps) => {
   const [kpis, setKPIs] = useState<KPI[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
-    // Simulate AI processing
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      const generatedKPIs = generateKPIs(strategy.selectedFeature?.title || "");
-      setKPIs(generatedKPIs);
-      setIsLoading(false);
-    }, 1200);
+    const loadKPIs = async () => {
+      setIsLoading(true);
+      try {
+        const generatedKPIs = await generateKPIs(
+          strategy.selectedFeature?.title || "",
+          strategy.selectedFeature?.description || ""
+        );
+        setKPIs(generatedKPIs);
+      } catch (error) {
+        console.error('Error generating KPIs:', error);
+        toast({
+          title: "Error",
+          description: "Failed to generate KPIs. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    return () => clearTimeout(timer);
+    loadKPIs();
   }, [strategy.selectedFeature]);
 
   const handleKPIToggle = (kpiId: string) => {
