@@ -10,13 +10,13 @@ Branding colors: #52B0E7 (Sky Blue), #1E293B (Slate), #14213d (Navy), #e5e5e5 (L
   :root {
     /* Light Mode - Brand Colors */
     --background: 0 0% 100%;
-    --foreground: 217 48% 16%;
+    --foreground: 217 48% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 217 48% 16%;
+    --card-foreground: 217 48% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 217 48% 16%;
+    --popover-foreground: 217 48% 12%;
 
     /* Primary - Sky Blue (#52B0E7) */
     --primary: 200 75% 61%;
@@ -24,38 +24,38 @@ Branding colors: #52B0E7 (Sky Blue), #1E293B (Slate), #14213d (Navy), #e5e5e5 (L
     
     /* Primary variants for gradients */
     --primary-glow: 200 85% 70%;
-    --primary-accent: 200 70% 50%;
+    --primary-accent: 200 70% 45%;
 
     /* Secondary - Light Gray */
-    --secondary: 0 0% 90%;
-    --secondary-foreground: 217 48% 16%;
+    --secondary: 0 0% 92%;
+    --secondary-foreground: 217 48% 12%;
 
     /* Muted - Soft Gray */
-    --muted: 0 0% 90%;
-    --muted-foreground: 217 33% 40%;
+    --muted: 0 0% 94%;
+    --muted-foreground: 217 40% 35%;
 
-    /* Accent - Sky Blue Lighter */
-    --accent: 200 75% 95%;
-    --accent-foreground: 217 48% 16%;
+    /* Accent - Vibrant Orange (#fca311) */
+    --accent: 37 93% 53%;
+    --accent-foreground: 0 0% 100%;
 
     /* Destructive - Red */
-    --destructive: 0 70% 58%;
+    --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 100%;
 
     /* UI Elements */
-    --border: 0 0% 85%;
-    --input: 0 0% 90%;
+    --border: 0 0% 82%;
+    --input: 0 0% 88%;
     --ring: 200 75% 61%;
 
     --radius: 0.75rem;
 
     /* Success - Green */
-    --success: 150 70% 45%;
+    --success: 150 65% 40%;
     --success-foreground: 0 0% 100%;
 
     /* Warning - Orange */
-    --warning: 35 85% 55%;
-    --warning-foreground: 217 48% 16%;
+    --warning: 37 93% 53%;
+    --warning-foreground: 0 0% 100%;
 
     /* Gradients */
     --gradient-cosmic: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
@@ -82,49 +82,49 @@ Branding colors: #52B0E7 (Sky Blue), #1E293B (Slate), #14213d (Navy), #e5e5e5 (L
 
   .dark {
     /* Dark Mode - Navy & Slate */
-    --background: 217 48% 16%;
-    --foreground: 0 0% 90%;
+    --background: 217 48% 12%;
+    --foreground: 0 0% 95%;
 
-    --card: 217 33% 20%;
-    --card-foreground: 0 0% 90%;
+    --card: 217 40% 18%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 217 33% 20%;
-    --popover-foreground: 0 0% 90%;
+    --popover: 217 40% 18%;
+    --popover-foreground: 0 0% 95%;
 
     /* Primary - Sky Blue (maintained for consistency) */
     --primary: 200 75% 61%;
-    --primary-foreground: 217 48% 16%;
+    --primary-foreground: 217 48% 10%;
     
     /* Primary variants */
     --primary-glow: 200 85% 70%;
-    --primary-accent: 200 70% 50%;
+    --primary-accent: 200 70% 45%;
 
     /* Secondary - Slate */
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 0 0% 90%;
+    --secondary: 217 40% 22%;
+    --secondary-foreground: 0 0% 95%;
 
     /* Muted - Dark Slate */
-    --muted: 217 33% 17%;
-    --muted-foreground: 0 0% 65%;
+    --muted: 217 40% 20%;
+    --muted-foreground: 0 0% 70%;
 
-    /* Accent - Slate Light */
-    --accent: 217 33% 25%;
-    --accent-foreground: 0 0% 90%;
+    /* Accent - Vibrant Orange (#fca311) */
+    --accent: 37 93% 53%;
+    --accent-foreground: 217 48% 10%;
 
     /* Destructive */
-    --destructive: 0 62.8% 50%;
+    --destructive: 0 65% 55%;
     --destructive-foreground: 0 0% 100%;
 
     /* UI Elements */
-    --border: 217 33% 25%;
-    --input: 217 33% 25%;
+    --border: 217 33% 28%;
+    --input: 217 33% 28%;
     --ring: 200 75% 61%;
 
     /* Success & Warning */
-    --success: 150 70% 45%;
+    --success: 150 65% 45%;
     --success-foreground: 0 0% 100%;
-    --warning: 35 85% 55%;
-    --warning-foreground: 217 48% 16%;
+    --warning: 37 93% 53%;
+    --warning-foreground: 217 48% 10%;
 
     --sidebar-background: 217 48% 10%;
     --sidebar-foreground: 0 0% 95%;
