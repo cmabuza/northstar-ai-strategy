@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Rocket, Target, BarChart3, Download, History, X } from "lucide-react";
+import { Rocket, Target, BarChart3, Download, History, X, FileJson, FileSpreadsheet, FileText } from "lucide-react";
 import { StepIndicator } from "@/components/StepIndicator";
 import { OKRInput } from "@/components/OKRInput";
 import { FeatureSelection } from "@/components/FeatureSelection";
@@ -9,8 +9,10 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { databaseService } from "@/services/database";
 import { useToast } from "@/hooks/use-toast";
+import { exportToJSON, exportToCSV, exportToPDF } from "@/lib/exportUtils";
 
 export interface Strategy {
   okr: string;
@@ -178,7 +180,7 @@ const Index = () => {
     setCurrentStep(strategyData.features?.length ? 4 : 1);
   };
 
-  const exportStrategy = async () => {
+  const exportStrategy = async (format: 'json' | 'csv' | 'pdf') => {
     if (!strategyId) {
       toast({
         title: "Error",
@@ -209,17 +211,21 @@ const Index = () => {
         implementation: data.implementations?.[0],
       };
 
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `strategy-${new Date().toISOString()}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
+      switch (format) {
+        case 'json':
+          exportToJSON(exportData);
+          break;
+        case 'csv':
+          exportToCSV(exportData);
+          break;
+        case 'pdf':
+          exportToPDF(exportData);
+          break;
+      }
 
       toast({
         title: "Success",
-        description: "Strategy exported successfully!",
+        description: `Strategy exported as ${format.toUpperCase()} successfully!`,
       });
     } catch (error) {
       toast({
@@ -259,15 +265,32 @@ const Index = () => {
                 <span className="hidden sm:inline">History</span>
               </Button>
               {strategyId && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={exportStrategy}
-                  disabled={loading}
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Export</span>
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={loading}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      <span className="hidden sm:inline">Export</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-40">
+                    <DropdownMenuItem onClick={() => exportStrategy('json')} className="cursor-pointer">
+                      <FileJson className="h-4 w-4 mr-2" />
+                      Export JSON
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => exportStrategy('csv')} className="cursor-pointer">
+                      <FileSpreadsheet className="h-4 w-4 mr-2" />
+                      Export CSV
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => exportStrategy('pdf')} className="cursor-pointer">
+                      <FileText className="h-4 w-4 mr-2" />
+                      Export PDF
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               )}
             </div>
           </div>
