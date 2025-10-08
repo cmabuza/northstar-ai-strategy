@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Download, ArrowLeft, Calendar, Code, BarChart3, Database, CheckCircle2 } from "lucide-react";
+import { Download, ArrowLeft, Calendar, Code, BarChart3, Database, CheckCircle2, RotateCcw } from "lucide-react";
 import { Strategy } from "@/pages/Index";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 interface ImplementationPlanProps {
   strategy: Strategy;
   onBack: () => void;
+  onStartOver: () => void;
   loading?: boolean;
 }
 
@@ -44,7 +45,7 @@ const generateImplementationPlan = async (strategy: Strategy) => {
   };
 };
 
-export const ImplementationPlan = ({ strategy, onBack, loading }: ImplementationPlanProps) => {
+export const ImplementationPlan = ({ strategy, onBack, onStartOver, loading }: ImplementationPlanProps) => {
   const [plan, setPlan] = useState<{ steps: ImplementationStep[], trackingEvents: TrackingEvent[] }>({ steps: [], trackingEvents: [] });
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
@@ -282,15 +283,25 @@ export const ImplementationPlan = ({ strategy, onBack, loading }: Implementation
       </Card>
 
       {/* Actions */}
-      <div className="flex justify-between pt-6">
-        <Button
-          variant="outline"
-          onClick={onBack}
-          className="border-border/50 hover:bg-secondary"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back
-        </Button>
+      <div className="flex flex-col sm:flex-row justify-between gap-4 pt-6">
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={onBack}
+            className="border-border/50 hover:bg-secondary"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back
+          </Button>
+          <Button
+            variant="outline"
+            onClick={onStartOver}
+            className="border-primary/50 hover:bg-primary/10 text-primary"
+          >
+            <RotateCcw className="mr-2 h-4 w-4" />
+            Start New Journey
+          </Button>
+        </div>
         <Button
           onClick={handleExport}
           className="bg-gradient-to-r from-success to-success/80 hover:from-success/90 hover:to-success/70 text-success-foreground shadow-cosmic transition-all duration-200"

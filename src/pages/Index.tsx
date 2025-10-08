@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Rocket, Target, BarChart3, Download, History, X, FileJson, FileSpreadsheet, FileText } from "lucide-react";
+import { Rocket, Target, BarChart3, Download, History, X, FileJson, FileSpreadsheet, FileText, RotateCcw } from "lucide-react";
 import { StepIndicator } from "@/components/StepIndicator";
 import { OKRInput } from "@/components/OKRInput";
 import { FeatureSelection } from "@/components/FeatureSelection";
@@ -157,6 +157,16 @@ const Index = () => {
     }
   };
 
+  const handleStartOver = () => {
+    setStrategy({ okr: "", softwareContext: "" });
+    setStrategyId(null);
+    setCurrentStep(1);
+    toast({
+      title: "Journey Reset",
+      description: "Starting a new strategy from the beginning.",
+    });
+  };
+
   const loadStrategy = (strategyData: any) => {
     setStrategy({
       okr: strategyData.okr_text,
@@ -256,6 +266,17 @@ const Index = () => {
             </div>
             <div className="flex gap-2">
               <ThemeToggle />
+              {currentStep > 1 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleStartOver}
+                  className="border-warning/50 text-warning hover:bg-warning/10"
+                >
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  <span className="hidden sm:inline">Start Over</span>
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="sm"
@@ -384,6 +405,7 @@ const Index = () => {
             <ImplementationPlan
               strategy={strategy}
               onBack={handleBack}
+              onStartOver={handleStartOver}
               loading={loading}
             />
           )}
