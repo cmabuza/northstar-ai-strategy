@@ -2,8 +2,10 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Target, ArrowRight, Lightbulb } from "lucide-react";
+import { Target, ArrowRight, Lightbulb, TestTube2 } from "lucide-react";
 import { Strategy } from "@/pages/Index";
+import { testAIConnection } from "@/lib/testAI";
+import { useToast } from "@/hooks/use-toast";
 
 interface OKRInputProps {
   strategy: Strategy;
@@ -33,6 +35,27 @@ const sampleOKRs = [
 export const OKRInput = ({ strategy, onStrategyUpdate, onNext, loading }: OKRInputProps) => {
   const [okrText, setOkrText] = useState(strategy.okr);
   const [softwareContext, setSoftwareContext] = useState(strategy.softwareContext);
+  const [testing, setTesting] = useState(false);
+  const { toast } = useToast();
+
+  const handleTest = async () => {
+    setTesting(true);
+    const result = await testAIConnection();
+    setTesting(false);
+    
+    if (result.success) {
+      toast({
+        title: "AI Connection Success!",
+        description: "Lovable AI is working correctly and ready to generate content.",
+      });
+    } else {
+      toast({
+        title: "AI Connection Failed",
+        description: result.error || "Could not connect to AI service. Please check your setup.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleSampleSelect = (sampleOKR: string) => {
     setOkrText(sampleOKR);
@@ -57,6 +80,16 @@ export const OKRInput = ({ strategy, onStrategyUpdate, onNext, loading }: OKRInp
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
           Start by defining your Objective and Key Results. Our AI will analyze your goals and suggest strategic features to achieve them.
         </p>
+        <Button
+          onClick={handleTest}
+          disabled={testing}
+          variant="outline"
+          size="sm"
+          className="mt-4"
+        >
+          <TestTube2 className="h-4 w-4 mr-2" />
+          {testing ? "Testing AI Connection..." : "Test AI Connection"}
+        </Button>
       </div>
 
       {/* Sample OKRs */}
