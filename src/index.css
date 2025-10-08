@@ -2,64 +2,64 @@
 @tailwind components;
 @tailwind utilities;
 
-/* North Star Nav - Space-themed Design System
-Professional indigo/blue space color scheme with cosmic gradients
+/* North Star Nav - Brand Design System
+Branding colors: #52B0E7 (Sky Blue), #1E293B (Slate), #14213d (Navy), #e5e5e5 (Light Gray), #ffffff (White)
 */
 
 @layer base {
   :root {
-    /* Space Theme - Light Mode */
-    --background: 220 25% 98%;
-    --foreground: 235 25% 15%;
+    /* Light Mode - Brand Colors */
+    --background: 0 0% 100%;
+    --foreground: 217 48% 16%;
 
-    --card: 220 20% 100%;
-    --card-foreground: 235 25% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 217 48% 16%;
 
-    --popover: 220 20% 100%;
-    --popover-foreground: 235 25% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 217 48% 16%;
 
-    /* Primary - Deep Space Blue */
-    --primary: 235 70% 25%;
-    --primary-foreground: 220 15% 98%;
+    /* Primary - Sky Blue (#52B0E7) */
+    --primary: 200 75% 61%;
+    --primary-foreground: 0 0% 100%;
     
     /* Primary variants for gradients */
-    --primary-glow: 235 85% 45%;
-    --primary-accent: 245 80% 35%;
+    --primary-glow: 200 85% 70%;
+    --primary-accent: 200 70% 50%;
 
-    /* Secondary - Cosmic Indigo */
-    --secondary: 245 40% 92%;
-    --secondary-foreground: 235 70% 25%;
+    /* Secondary - Light Gray */
+    --secondary: 0 0% 90%;
+    --secondary-foreground: 217 48% 16%;
 
-    /* Muted - Nebula Gray */
-    --muted: 235 15% 94%;
-    --muted-foreground: 235 20% 45%;
+    /* Muted - Soft Gray */
+    --muted: 0 0% 90%;
+    --muted-foreground: 217 33% 40%;
 
-    /* Accent - Stellar Purple */
-    --accent: 250 50% 88%;
-    --accent-foreground: 235 70% 25%;
+    /* Accent - Sky Blue Lighter */
+    --accent: 200 75% 95%;
+    --accent-foreground: 217 48% 16%;
 
-    /* Destructive - Cosmic Red */
+    /* Destructive - Red */
     --destructive: 0 70% 58%;
-    --destructive-foreground: 220 15% 98%;
+    --destructive-foreground: 0 0% 100%;
 
     /* UI Elements */
-    --border: 235 20% 88%;
-    --input: 235 20% 95%;
-    --ring: 235 70% 25%;
+    --border: 0 0% 85%;
+    --input: 0 0% 90%;
+    --ring: 200 75% 61%;
 
     --radius: 0.75rem;
 
-    /* Success - Cosmic Green */
+    /* Success - Green */
     --success: 150 70% 45%;
-    --success-foreground: 220 15% 98%;
+    --success-foreground: 0 0% 100%;
 
-    /* Warning - Solar Orange */
+    /* Warning - Orange */
     --warning: 35 85% 55%;
-    --warning-foreground: 235 25% 15%;
+    --warning-foreground: 217 48% 16%;
 
     /* Gradients */
     --gradient-cosmic: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
-    --gradient-stellar: linear-gradient(135deg, hsl(var(--primary-accent)), hsl(var(--accent)));
+    --gradient-stellar: linear-gradient(135deg, hsl(var(--primary-accent)), hsl(var(--primary-glow)));
     --gradient-nebula: linear-gradient(180deg, hsl(var(--background)), hsl(var(--secondary)));
 
     /* Shadows */
@@ -71,58 +71,69 @@ Professional indigo/blue space color scheme with cosmic gradients
     --transition-cosmic: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
+    --sidebar-foreground: 217 33% 26%;
+    --sidebar-primary: 217 48% 16%;
     --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 0 0% 95%;
+    --sidebar-accent-foreground: 217 48% 16%;
+    --sidebar-border: 0 0% 91%;
+    --sidebar-ring: 200 75% 61%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Dark Mode - Navy & Slate */
+    --background: 217 48% 16%;
+    --foreground: 0 0% 90%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 217 33% 20%;
+    --card-foreground: 0 0% 90%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 217 33% 20%;
+    --popover-foreground: 0 0% 90%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    /* Primary - Sky Blue (maintained for consistency) */
+    --primary: 200 75% 61%;
+    --primary-foreground: 217 48% 16%;
+    
+    /* Primary variants */
+    --primary-glow: 200 85% 70%;
+    --primary-accent: 200 70% 50%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    /* Secondary - Slate */
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 0 0% 90%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    /* Muted - Dark Slate */
+    --muted: 217 33% 17%;
+    --muted-foreground: 0 0% 65%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    /* Accent - Slate Light */
+    --accent: 217 33% 25%;
+    --accent-foreground: 0 0% 90%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    /* Destructive */
+    --destructive: 0 62.8% 50%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* UI Elements */
+    --border: 217 33% 25%;
+    --input: 217 33% 25%;
+    --ring: 200 75% 61%;
+
+    /* Success & Warning */
+    --success: 150 70% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 35 85% 55%;
+    --warning-foreground: 217 48% 16%;
+
+    --sidebar-background: 217 48% 10%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 200 75% 61%;
+    --sidebar-primary-foreground: 217 48% 16%;
+    --sidebar-accent: 217 33% 15%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 217 33% 15%;
+    --sidebar-ring: 200 75% 61%;
   }
 }
 

@@ -5,6 +5,7 @@ import { OKRInput } from "@/components/OKRInput";
 import { FeatureSelection } from "@/components/FeatureSelection";
 import { KPISelection } from "@/components/KPISelection";
 import { ImplementationPlan } from "@/components/ImplementationPlan";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -77,7 +78,7 @@ const Index = () => {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to save strategy",
+        description: "Failed to save strategy. Please try again.",
         variant: "destructive",
       });
       console.error('Error saving strategy:', error);
@@ -101,7 +102,7 @@ const Index = () => {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to save feature",
+        description: "Failed to save feature. Please try again.",
         variant: "destructive",
       });
       console.error('Error saving feature:', error);
@@ -130,7 +131,7 @@ const Index = () => {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to save KPIs",
+        description: "Failed to save KPIs. Please try again.",
         variant: "destructive",
       });
       console.error('Error saving KPIs:', error);
@@ -218,12 +219,12 @@ const Index = () => {
 
       toast({
         title: "Success",
-        description: "Strategy exported successfully",
+        description: "Strategy exported successfully!",
       });
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to export strategy",
+        description: "Failed to export strategy. Please try again.",
         variant: "destructive",
       });
       console.error('Error exporting strategy:', error);
@@ -235,9 +236,9 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-accent/30">
       {/* Header */}
-      <header className="border-b border-border/50 bg-card/80 backdrop-blur-sm">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
+      <header className="border-b border-border/50 bg-card/80 backdrop-blur-sm sticky top-0 z-40">
+        <div className="container mx-auto px-4 sm:px-6 py-4">
+          <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-gradient-to-br from-primary to-primary-glow shadow-cosmic">
                 <Rocket className="h-6 w-6 text-primary-foreground" />
@@ -248,13 +249,14 @@ const Index = () => {
               </div>
             </div>
             <div className="flex gap-2">
+              <ThemeToggle />
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setHistoryOpen(true)}
               >
                 <History className="h-4 w-4 mr-2" />
-                History
+                <span className="hidden sm:inline">History</span>
               </Button>
               {strategyId && (
                 <Button
@@ -264,7 +266,7 @@ const Index = () => {
                   disabled={loading}
                 >
                   <Download className="h-4 w-4 mr-2" />
-                  Export
+                  <span className="hidden sm:inline">Export</span>
                 </Button>
               )}
             </div>
@@ -274,8 +276,8 @@ const Index = () => {
 
       {/* History Sidebar */}
       {historyOpen && (
-        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
-          <div className="fixed right-0 top-0 h-full w-80 bg-card border-l shadow-lg">
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm" onClick={() => setHistoryOpen(false)}>
+          <div className="fixed right-0 top-0 h-full w-full sm:w-96 bg-card border-l shadow-lg" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between p-4 border-b">
               <h2 className="font-semibold">Previous Strategies</h2>
               <Button
@@ -318,7 +320,7 @@ const Index = () => {
       )}
 
       {/* Main Content */}
-      <main className="container mx-auto px-6 py-8">
+      <main className="container mx-auto px-4 sm:px-6 py-8">
         {/* Progress Indicator */}
         <div className="mb-8">
           <StepIndicator steps={steps} currentStep={currentStep} />
