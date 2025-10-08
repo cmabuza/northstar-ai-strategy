@@ -9,6 +9,7 @@ interface OKRInputProps {
   strategy: Strategy;
   onStrategyUpdate: (strategy: Strategy) => void;
   onNext: () => void;
+  loading?: boolean;
 }
 
 const sampleOKRs = [
@@ -29,7 +30,7 @@ const sampleOKRs = [
   }
 ];
 
-export const OKRInput = ({ strategy, onStrategyUpdate, onNext }: OKRInputProps) => {
+export const OKRInput = ({ strategy, onStrategyUpdate, onNext, loading }: OKRInputProps) => {
   const [okrText, setOkrText] = useState(strategy.okr);
   const [softwareContext, setSoftwareContext] = useState(strategy.softwareContext);
 
@@ -123,10 +124,10 @@ export const OKRInput = ({ strategy, onStrategyUpdate, onNext }: OKRInputProps) 
           <div className="flex justify-end">
             <Button
               onClick={handleSubmit}
-              disabled={!okrText.trim()}
+              disabled={!okrText.trim() || loading}
               className="bg-gradient-to-r from-primary to-primary-glow hover:from-primary-accent hover:to-primary text-primary-foreground shadow-cosmic transition-all duration-200 hover:shadow-stellar"
             >
-              Generate Features
+              {loading ? "Saving..." : "Generate Features"}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>

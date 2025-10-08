@@ -13,6 +13,7 @@ interface FeatureSelectionProps {
   onStrategyUpdate: (strategy: Strategy) => void;
   onNext: () => void;
   onBack: () => void;
+  loading?: boolean;
 }
 
 // Mock AI-generated features based on common OKR patterns
@@ -76,7 +77,7 @@ const getEffortColor = (effort: string) => {
   }
 };
 
-export const FeatureSelection = ({ strategy, onStrategyUpdate, onNext, onBack }: FeatureSelectionProps) => {
+export const FeatureSelection = ({ strategy, onStrategyUpdate, onNext, onBack, loading }: FeatureSelectionProps) => {
   const [features, setFeatures] = useState<Feature[]>([]);
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(strategy.selectedFeature || null);
   const [isLoading, setIsLoading] = useState(true);
@@ -321,10 +322,10 @@ export const FeatureSelection = ({ strategy, onStrategyUpdate, onNext, onBack }:
         </Button>
         <Button
           onClick={handleNext}
-          disabled={!selectedFeature}
+          disabled={!selectedFeature || loading}
           className="bg-gradient-to-r from-primary to-primary-glow hover:from-primary-accent hover:to-primary text-primary-foreground shadow-cosmic transition-all duration-200 hover:shadow-stellar"
         >
-          Continue to KPIs
+          {loading ? "Saving..." : "Continue to KPIs"}
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </div>

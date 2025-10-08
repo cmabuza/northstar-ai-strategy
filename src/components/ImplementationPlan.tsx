@@ -8,6 +8,7 @@ import { Strategy } from "@/pages/Index";
 interface ImplementationPlanProps {
   strategy: Strategy;
   onBack: () => void;
+  loading?: boolean;
 }
 
 interface ImplementationStep {
@@ -102,7 +103,7 @@ const generateImplementationPlan = (strategy: Strategy) => {
   return { steps, trackingEvents };
 };
 
-export const ImplementationPlan = ({ strategy, onBack }: ImplementationPlanProps) => {
+export const ImplementationPlan = ({ strategy, onBack, loading }: ImplementationPlanProps) => {
   const [plan, setPlan] = useState<{ steps: ImplementationStep[], trackingEvents: TrackingEvent[] }>({ steps: [], trackingEvents: [] });
   const [isLoading, setIsLoading] = useState(true);
 

@@ -10,6 +10,7 @@ interface KPISelectionProps {
   onStrategyUpdate: (strategy: Strategy) => void;
   onNext: () => void;
   onBack: () => void;
+  loading?: boolean;
 }
 
 // Generate KPIs based on selected feature
@@ -77,7 +78,7 @@ const generateKPIs = (featureTitle: string): KPI[] => {
   return baseKPIs;
 };
 
-export const KPISelection = ({ strategy, onStrategyUpdate, onNext, onBack }: KPISelectionProps) => {
+export const KPISelection = ({ strategy, onStrategyUpdate, onNext, onBack, loading }: KPISelectionProps) => {
   const [kpis, setKPIs] = useState<KPI[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -217,10 +218,10 @@ export const KPISelection = ({ strategy, onStrategyUpdate, onNext, onBack }: KPI
         </Button>
         <Button
           onClick={handleNext}
-          disabled={selectedCount === 0}
+          disabled={selectedCount === 0 || loading}
           className="bg-gradient-to-r from-primary to-primary-glow hover:from-primary-accent hover:to-primary text-primary-foreground shadow-cosmic transition-all duration-200 hover:shadow-stellar"
         >
-          Generate Implementation Plan
+          {loading ? "Saving..." : "Generate Implementation Plan"}
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </div>
