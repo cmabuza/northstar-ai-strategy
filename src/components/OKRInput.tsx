@@ -57,9 +57,11 @@ export const OKRInput = ({ strategy, onStrategyUpdate, onNext, loading }: OKRInp
     }
   };
 
-  const handleSampleSelect = (sampleOKR: string) => {
-    setOkrText(sampleOKR);
-    onStrategyUpdate({ ...strategy, okr: sampleOKR });
+  const handleSampleSelect = (sample: typeof sampleOKRs[0]) => {
+    setOkrText(sample.okr);
+    const context = `A ${sample.company} platform`;
+    setSoftwareContext(context);
+    onStrategyUpdate({ ...strategy, okr: sample.okr, softwareContext: context });
   };
 
   const handleSubmit = () => {
@@ -103,7 +105,7 @@ export const OKRInput = ({ strategy, onStrategyUpdate, onNext, loading }: OKRInp
             <Card 
               key={sample.company}
               className="cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105 border-border/50 bg-card/80 backdrop-blur-sm"
-              onClick={() => handleSampleSelect(sample.okr)}
+              onClick={() => handleSampleSelect(sample)}
             >
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg text-foreground">{sample.company}</CardTitle>
@@ -157,7 +159,7 @@ export const OKRInput = ({ strategy, onStrategyUpdate, onNext, loading }: OKRInp
           <div className="flex justify-end">
             <Button
               onClick={handleSubmit}
-              disabled={!okrText.trim() || loading}
+              disabled={!okrText.trim() || !softwareContext.trim() || loading}
               className="bg-gradient-to-r from-primary to-primary-glow hover:from-primary-accent hover:to-primary text-primary-foreground shadow-cosmic transition-all duration-200 hover:shadow-stellar"
             >
               {loading ? "Saving..." : "Generate Features"}
