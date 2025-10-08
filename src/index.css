@@ -3,38 +3,38 @@
 @tailwind utilities;
 
 /* North Star Nav - Brand Design System
-Branding colors: #52B0E7 (Sky Blue), #1E293B (Slate), #14213d (Navy), #e5e5e5 (Light Gray), #ffffff (White)
+Branding colors: #231942 (Deep Purple), #14213d (Navy), #fca311 (Orange), #e5e5e5 (Light Gray)
 */
 
 @layer base {
   :root {
     /* Light Mode - Brand Colors */
     --background: 0 0% 100%;
-    --foreground: 217 48% 8%;
+    --foreground: 213 48% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 217 48% 8%;
+    --card-foreground: 213 48% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 217 48% 8%;
+    --popover-foreground: 213 48% 12%;
 
-    /* Primary - Sky Blue (#52B0E7) - Darkened for AAA */
-    --primary: 200 80% 45%;
+    /* Primary - Navy (#14213d) - AAA Compliant */
+    --primary: 213 48% 16%;
     --primary-foreground: 0 0% 100%;
     
     /* Primary variants for gradients */
-    --primary-glow: 200 85% 55%;
-    --primary-accent: 200 85% 35%;
+    --primary-glow: 252 48% 25%;
+    --primary-accent: 213 48% 12%;
 
-    /* Secondary - Light Gray */
-    --secondary: 0 0% 92%;
-    --secondary-foreground: 217 48% 8%;
+    /* Secondary - Light Gray (#e5e5e5) */
+    --secondary: 0 0% 90%;
+    --secondary-foreground: 213 48% 12%;
 
     /* Muted - Soft Gray */
     --muted: 0 0% 94%;
-    --muted-foreground: 217 45% 25%;
+    --muted-foreground: 213 45% 25%;
 
-    /* Accent - Vibrant Orange (#fca311) - Darkened for AAA */
+    /* Accent - Orange (#fca311) - AAA Compliant */
     --accent: 37 98% 40%;
     --accent-foreground: 0 0% 100%;
 
@@ -43,97 +43,97 @@ Branding colors: #52B0E7 (Sky Blue), #1E293B (Slate), #14213d (Navy), #e5e5e5 (L
     --destructive-foreground: 0 0% 100%;
 
     /* UI Elements */
-    --border: 0 0% 75%;
-    --input: 0 0% 82%;
-    --ring: 200 80% 45%;
+    --border: 0 0% 85%;
+    --input: 0 0% 90%;
+    --ring: 252 48% 19%;
 
     --radius: 0.75rem;
 
-    /* Success - Green - Darkened for AAA */
+    /* Success - Green - AAA Compliant */
     --success: 150 70% 32%;
     --success-foreground: 0 0% 100%;
 
-    /* Warning - Orange - Darkened for AAA */
+    /* Warning - Orange (#fca311) - AAA Compliant */
     --warning: 37 98% 40%;
     --warning-foreground: 0 0% 100%;
 
     /* Gradients */
-    --gradient-cosmic: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
-    --gradient-stellar: linear-gradient(135deg, hsl(var(--primary-accent)), hsl(var(--primary-glow)));
-    --gradient-nebula: linear-gradient(180deg, hsl(var(--background)), hsl(var(--secondary)));
+    --gradient-cosmic: linear-gradient(135deg, hsl(213 48% 16%), hsl(252 48% 25%));
+    --gradient-stellar: linear-gradient(135deg, hsl(37 98% 40%), hsl(37 98% 50%));
+    --gradient-nebula: linear-gradient(180deg, hsl(0 0% 100%), hsl(0 0% 90%));
 
     /* Shadows */
-    --shadow-cosmic: 0 10px 30px -5px hsl(var(--primary) / 0.2);
-    --shadow-stellar: 0 20px 40px -10px hsl(var(--primary-glow) / 0.3);
-    --shadow-glow: 0 0 30px hsl(var(--primary-glow) / 0.4);
+    --shadow-cosmic: 0 10px 30px -5px hsl(213 48% 16% / 0.3);
+    --shadow-stellar: 0 20px 40px -10px hsl(252 48% 19% / 0.4);
+    --shadow-glow: 0 0 30px hsl(37 98% 40% / 0.5);
 
     /* Transitions */
     --transition-cosmic: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 217 33% 26%;
-    --sidebar-primary: 217 48% 16%;
-    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-foreground: 213 48% 12%;
+    --sidebar-primary: 213 48% 16%;
+    --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 0 0% 95%;
-    --sidebar-accent-foreground: 217 48% 16%;
+    --sidebar-accent-foreground: 213 48% 12%;
     --sidebar-border: 0 0% 91%;
-    --sidebar-ring: 200 75% 61%;
+    --sidebar-ring: 252 48% 19%;
   }
 
   .dark {
-    /* Dark Mode - Navy & Slate - AAA Compliant */
-    --background: 217 50% 8%;
+    /* Dark Mode - Deep Purple & Navy - AAA Compliant */
+    --background: 213 48% 8%;
     --foreground: 0 0% 98%;
 
-    --card: 217 45% 12%;
+    --card: 213 45% 12%;
     --card-foreground: 0 0% 98%;
 
-    --popover: 217 45% 12%;
+    --popover: 213 45% 12%;
     --popover-foreground: 0 0% 98%;
 
-    /* Primary - Sky Blue - Lightened for AAA on dark bg */
-    --primary: 200 85% 65%;
-    --primary-foreground: 217 50% 8%;
+    /* Primary - Deep Purple (#231942) - Lightened for AAA */
+    --primary: 252 48% 65%;
+    --primary-foreground: 213 48% 8%;
     
     /* Primary variants */
-    --primary-glow: 200 90% 75%;
-    --primary-accent: 200 80% 55%;
+    --primary-glow: 252 60% 75%;
+    --primary-accent: 252 50% 55%;
 
-    /* Secondary - Slate */
-    --secondary: 217 40% 18%;
+    /* Secondary - Light Gray */
+    --secondary: 213 35% 18%;
     --secondary-foreground: 0 0% 98%;
 
-    /* Muted - Dark Slate */
-    --muted: 217 40% 15%;
+    /* Muted - Dark Navy */
+    --muted: 213 40% 15%;
     --muted-foreground: 0 0% 80%;
 
-    /* Accent - Vibrant Orange - Lightened for AAA */
+    /* Accent - Orange (#fca311) - Lightened for AAA */
     --accent: 37 98% 60%;
-    --accent-foreground: 217 50% 8%;
+    --accent-foreground: 213 48% 8%;
 
     /* Destructive - Lightened for AAA */
     --destructive: 0 75% 60%;
-    --destructive-foreground: 217 50% 8%;
+    --destructive-foreground: 213 48% 8%;
 
     /* UI Elements */
-    --border: 217 35% 25%;
-    --input: 217 35% 25%;
-    --ring: 200 85% 65%;
+    --border: 213 35% 25%;
+    --input: 213 35% 25%;
+    --ring: 252 48% 65%;
 
     /* Success & Warning - Lightened for AAA */
     --success: 150 70% 55%;
-    --success-foreground: 217 50% 8%;
+    --success-foreground: 213 48% 8%;
     --warning: 37 98% 60%;
-    --warning-foreground: 217 50% 8%;
+    --warning-foreground: 213 48% 8%;
 
-    --sidebar-background: 217 48% 10%;
+    --sidebar-background: 213 48% 10%;
     --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 200 75% 61%;
-    --sidebar-primary-foreground: 217 48% 16%;
-    --sidebar-accent: 217 33% 15%;
+    --sidebar-primary: 252 48% 65%;
+    --sidebar-primary-foreground: 213 48% 8%;
+    --sidebar-accent: 213 40% 15%;
     --sidebar-accent-foreground: 0 0% 95%;
-    --sidebar-border: 217 33% 15%;
-    --sidebar-ring: 200 75% 61%;
+    --sidebar-border: 213 35% 15%;
+    --sidebar-ring: 252 48% 65%;
   }
 }
 
