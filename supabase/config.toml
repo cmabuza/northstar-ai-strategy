@@ -2,3 +2,6 @@ project_id = "wctoouoaxbokkzhrvkhm"
 
 [functions.generate-features]
 verify_jwt = false
+
+[functions.create-demo-user]
+verify_jwt = false
