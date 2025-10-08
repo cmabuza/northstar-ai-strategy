@@ -1,6 +1,8 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
+// Version 2.0 - Fixed implementation type handling
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -218,6 +220,25 @@ serve(async (req) => {
     console.log('=== PARSED RESULT ===');
     console.log(JSON.stringify(result, null, 2));
     console.log('====================');
+
+    // Validate the result matches the expected type
+    if (type === 'implementation') {
+      if (!result.steps || !result.trackingEvents) {
+        console.error('ERROR: Implementation type but got wrong structure:', result);
+        throw new Error('AI returned wrong structure for implementation. Expected steps and trackingEvents arrays.');
+      }
+      console.log('✅ Implementation validation passed');
+    } else if (type === 'kpis') {
+      if (!result.kpis) {
+        console.error('ERROR: KPI type but got wrong structure:', result);
+        throw new Error('AI returned wrong structure for KPIs. Expected kpis array.');
+      }
+    } else if (type === 'features') {
+      if (!result.features) {
+        console.error('ERROR: Features type but got wrong structure:', result);
+        throw new Error('AI returned wrong structure for features. Expected features array.');
+      }
+    }
 
     return new Response(
       JSON.stringify(result),
