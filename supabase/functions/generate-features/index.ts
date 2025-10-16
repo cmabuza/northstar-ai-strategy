@@ -1,23 +1,163 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import {
+  checkRateLimit,
+  sanitizePromptInput,
+  detectThreats,
+  validatePayloadSize,
+  validatePromptLength,
+  extractUserId,
+  getSecurityHeaders,
+  validateRequestType,
+  getRateLimitHeaders,
+  logSecurityEvent,
+} from '../_shared/security.ts';
 
-// Version 3.0 - Strengthened tool choice enforcement
+// Version 4.0 - Added comprehensive security protection
+// Protects against: Rate Limiting, SSRF, DoS, XSS, SQL Injection, Prompt Injection
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+const corsHeaders = getSecurityHeaders();
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
+  let userId = 'anonymous';
+  let requestBody: any;
+
   try {
-    const { prompt, type } = await req.json();
+    // 1. AUTHENTICATION & RATE LIMITING
+    // Extract user ID from auth token
+    const authHeader = req.headers.get('authorization');
+    const extractedUserId = extractUserId(authHeader);
+
+    if (!extractedUserId) {
+      logSecurityEvent('anonymous', 'invalid_request', { reason: 'Missing or invalid auth token' });
+      return new Response(
+        JSON.stringify({ error: 'Authentication required' }),
+        { status: 401, headers: corsHeaders }
+      );
+    }
+
+    userId = extractedUserId;
+
+    // Check rate limits
+    const rateLimitCheck = checkRateLimit(userId);
+    if (!rateLimitCheck.allowed) {
+      logSecurityEvent(userId, 'rate_limit', {
+        reason: rateLimitCheck.reason,
+        retryAfter: rateLimitCheck.retryAfter,
+      });
+
+      return new Response(
+        JSON.stringify({
+          error: rateLimitCheck.reason || 'Rate limit exceeded',
+          retryAfter: rateLimitCheck.retryAfter,
+        }),
+        {
+          status: 429,
+          headers: {
+            ...corsHeaders,
+            'Retry-After': rateLimitCheck.retryAfter?.toString() || '60',
+          },
+        }
+      );
+    }
+
+    // 2. DOS PROTECTION - Payload size validation
+    // Parse request with size limit
+    const rawBody = await req.text();
+    if (rawBody.length > 50000) {
+      logSecurityEvent(userId, 'invalid_request', {
+        reason: 'Payload too large',
+        size: rawBody.length,
+      });
+      return new Response(
+        JSON.stringify({ error: 'Request payload too large (max 50KB)' }),
+        { status: 413, headers: corsHeaders }
+      );
+    }
+
+    try {
+      requestBody = JSON.parse(rawBody);
+    } catch (parseError) {
+      logSecurityEvent(userId, 'invalid_request', { reason: 'Invalid JSON' });
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON format' }),
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
+    const payloadCheck = validatePayloadSize(requestBody);
+    if (!payloadCheck.valid) {
+      logSecurityEvent(userId, 'invalid_request', {
+        reason: payloadCheck.reason,
+        size: payloadCheck.size,
+      });
+      return new Response(
+        JSON.stringify({ error: payloadCheck.reason }),
+        { status: 413, headers: corsHeaders }
+      );
+    }
+
+    // Extract and validate request parameters
+    const { prompt, type } = requestBody;
+    // 3. VALIDATION - Type parameter
+    const typeValidation = validateRequestType(type);
+    if (!typeValidation.valid) {
+      logSecurityEvent(userId, 'invalid_request', { reason: typeValidation.reason });
+      return new Response(
+        JSON.stringify({ error: typeValidation.reason }),
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
+    // 4. VALIDATION - Prompt length and content
+    if (!prompt || typeof prompt !== 'string') {
+      logSecurityEvent(userId, 'invalid_request', { reason: 'Missing or invalid prompt' });
+      return new Response(
+        JSON.stringify({ error: 'Prompt is required and must be a string' }),
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
+    const promptLengthCheck = validatePromptLength(prompt);
+    if (!promptLengthCheck.valid) {
+      logSecurityEvent(userId, 'invalid_request', {
+        reason: promptLengthCheck.reason,
+        length: promptLengthCheck.length,
+      });
+      return new Response(
+        JSON.stringify({ error: promptLengthCheck.reason }),
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
+    // 5. THREAT DETECTION - XSS, SSRF, Prompt Injection
+    const threats = detectThreats(prompt);
+    if (threats.length > 0) {
+      logSecurityEvent(userId, 'threat_detected', {
+        threats,
+        promptPreview: prompt.substring(0, 100),
+      });
+      return new Response(
+        JSON.stringify({
+          error: 'Security threat detected in input',
+          details: threats,
+        }),
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
+    // 6. INPUT SANITIZATION - Sanitize prompt to remove dangerous characters
+    const sanitizedPrompt = sanitizePromptInput(prompt);
+
     console.log('=== REQUEST START ===');
-    console.log('Prompt:', prompt);
+    console.log('User ID:', userId);
     console.log('Type:', type);
+    console.log('Original Prompt Length:', prompt.length);
+    console.log('Sanitized Prompt Length:', sanitizedPrompt.length);
     console.log('===================');
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
@@ -188,12 +328,12 @@ This is about HOW to implement the feature step-by-step, NOT what to measure.`;
     console.log('✅ Pre-flight check passed:', toolDefinition.function.name);
 
     // Add example structure for implementation requests
-    let userMessage = prompt;
+    let userMessage = sanitizedPrompt;
     if (type === 'implementation') {
       userMessage += `\n\nREMINDER: Return ONLY the implementation plan structure with steps and trackingEvents. Do NOT return KPIs.`;
     }
 
-    const requestBody = {
+    const aiRequestBody = {
       model: 'google/gemini-2.5-flash',
       messages: [
         { role: 'system', content: systemPrompt },
@@ -203,16 +343,39 @@ This is about HOW to implement the feature step-by-step, NOT what to measure.`;
       tool_choice: { type: 'function', function: { name: toolDefinition.function.name } }
     };
 
-    console.log('Request body:', JSON.stringify(requestBody, null, 2));
+    console.log('AI Request prepared for type:', type);
 
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestBody),
-    });
+    // 7. SSRF PROTECTION - Only allow requests to approved AI gateway
+    const aiGatewayUrl = 'https://ai.gateway.lovable.dev/v1/chat/completions';
+
+    // Create abort controller for timeout (DoS protection)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+    let response: Response;
+    try {
+      response = await fetch(aiGatewayUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(aiRequestBody),
+        signal: controller.signal,
+      });
+    } catch (fetchError: any) {
+      clearTimeout(timeoutId);
+      if (fetchError.name === 'AbortError') {
+        logSecurityEvent(userId, 'invalid_request', { reason: 'Request timeout' });
+        return new Response(
+          JSON.stringify({ error: 'Request timeout - operation took too long' }),
+          { status: 504, headers: corsHeaders }
+        );
+      }
+      throw fetchError;
+    } finally {
+      clearTimeout(timeoutId);
+    }
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -274,16 +437,46 @@ This is about HOW to implement the feature step-by-step, NOT what to measure.`;
       }
     }
 
+    // Log successful request
+    logSecurityEvent(userId, 'success', {
+      type,
+      promptLength: sanitizedPrompt.length,
+      resultSize: JSON.stringify(result).length,
+    });
+
+    // Add rate limit headers to response
+    const rateLimitHeaders = getRateLimitHeaders(userId);
+
     return new Response(
       JSON.stringify(result),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      {
+        headers: {
+          ...corsHeaders,
+          ...rateLimitHeaders,
+          'Content-Type': 'application/json',
+        },
+      }
     );
 
   } catch (error) {
     console.error('Error in generate-features function:', error);
+
+    // Log error event
+    if (userId && userId !== 'anonymous') {
+      logSecurityEvent(userId, 'invalid_request', {
+        error: error.message || 'Unknown error',
+        stack: error.stack,
+      });
+    }
+
     return new Response(
-      JSON.stringify({ error: error.message || 'Internal server error' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({
+        error: error.message || 'Internal server error',
+      }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
     );
   }
 });
